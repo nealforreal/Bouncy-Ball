@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Bouncing and Dragging</title>
+<link rel='stylesheet' type='text/css' href='style.css'>
+<script src='ball.js'></script>
+<script src='utils.js'></script>
+ <script>
+        window.addEventListener('load', documentLoaded);
+        function documentLoaded(e){
+        var myCanvas = document.getElementById('myCanvas');
+        if(myCanvas && myCanvas.getContext){
+                var myContext = myCanvas.getContext('2d'),
+                myBall = new Ball(40, '#'+Math.floor(Math.random()*16777215).toString(16)),
+                left = 0,
+                ttop = 0,
+                right = myCanvas.width,
+                bottom = myCanvas.height,
+                vx = Math.random() * 10 - 5,
+                vy = Math.random() * 10 - 5,   
+                gravity = 0.2,
+                isMouseDown = false,
+                myMouse = utils.captureMouse(myCanvas),
+                bouncing = -0.2 ,
+                startingX, startingY;
+
+                myBall.x = right/2;
+                myBall.y = bottom/2;
+        
+        myCanvas.addEventListener('mousedown', function(e){
+        if(utils.containsPoint(myBall.getBounds(), myMouse.x, myMouse.y)){
+                isMouseDown = true;
+                startingX = myBall.x;
+                startingY = myBall.y;
+                myCanvas.addEventListener('mouseup', onMouseUp, false);
+                myCanvas.addEventListener('mousemove', onMouseMove, false);
+                }
+        }, false);                                                              
+
+        function onMouseUp(e){
+                isMouseDown = false;
+                myCanvas.removeEventListener('mouseup', onMouseUp, false);
+                myCanvas.removeEventListener('mousemove', onMouseMove, false);
+        }                             
+
+        function onMouseMove(e){
+                myBall.x = myMouse.x;
+                myBall.y = myMouse.y;
+        }
+
+        function trackVelocity () {
+                vx = myBall.x - startingX;
+                vy = myBall.y - startingY;
+                startingX = myBall.x;
+                startingY = myBall.y;
+        }                                                             
+
+        function catchDrag(){
+                vy += gravity;
+                myBall.x += vx;
+                myBall.y += vy;
+
+        if(myBall.x - myBall.radius < left){
+                myBall.x = left + myBall.radius;
+                vx *= bouncing;
+        }else if(myBall.x + myBall.radius > right){
+                myBall.x = right - myBall.radius;
+                vx *= bouncing;
+        }
+        if(myBall.y - myBall.radius < ttop){
+                myBall.y = ttop + myBall.radius;
+                vy *= bouncing;
+        }else if(myBall.y + myBall.radius > bottom){
+                myBall.y = bottom - myBall.radius;
+                vy *= bouncing;
+        }
+}
+
+        (function createAnim(){
+                window.requestAnimationFrame(createAnim, myCanvas);
+                myContext.clearRect(0, 0, myCanvas.width, myCanvas.height);
+                        if(isMouseDown){
+                                trackVelocity();
+                        }else{
+                                catchDrag();
+                        }
+                myBall.draw(myContext);
+                         })();
+                }
+
+}
+
+</script>
+</head>
+<body>
+<canvas width='600' height='400' id='myCanvas'>
+        <p>No support for canvas!!!</p>
+</canvas>
+</body>
+</html>
